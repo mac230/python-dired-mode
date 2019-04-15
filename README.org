@@ -1,0 +1,58 @@
+# Python Dired Mode README  -*- mode: org; fill-column: 80; eval: (elisp-org-hook); eval: (auto-fill-mode t) var: val; -*-
+
+* Python-dired - Emacs Minor-Mode for Viewing Python Objects/Functions/Modules/Etc...
+
+** Overview
+This minor mode implements 2 functions to view objects, functions, and modules
+in the current interactive python session in emacs.  The functionality is
+heavily inspired by the Emacs Speaks Statistics (ESS) rdired functionality:
+
+https://ess.r-project.org/Manual/ess.html#Rdired
+
+The python-dired minor mode has 2 functions that allow inspection of all
+objects, functions, and modules in the current session and inspection of
+individual objects, functions, and modules.  Calling either function will create
+a separate buffer to view information in. 
+
+The two functions are:
+
+1. python-dired - provides a buffer with information on the objects, functions,
+   and modules in the current python session.  Uses 
+
+#+BEGIN_SRC emacs-lisp 
+(python-shell-send-string-no-output "%whos" (python-shell-get-process))
+#+END_SRC
+
+to get output. 
+
+
+2. python-dired-inspect-object - for use in the python-dired buffer.  This
+   function uses
+
+#+BEGIN_SRC emacs-lisp 
+(python-shell-send-string-no-output object (python-shell-get-process)))
+#+END_SRC
+
+to display the object at point in a separate buffer. 
+
+
+
+** Keybindings 
+The following keybindings are defined in the buffers created by the python-dired
+functions:
+
+#+BEGIN_SRC emacs-lisp 
+(define-key map (kbd "n")   'next-line)
+(define-key map (kbd "p")   'previous-line)
+(define-key map (kbd "RET") 'python-dired-inspect-object)
+(define-key map (kbd "k")   (lambda ()
+                                  (interactive)
+                                  (if (string= (buffer-name) "*Python-Objects*")
+                                      (kill-buffer-and-window) (kill-buffer))))
+#+END_SRC
+
+The final binding, "k", provides a simple way of quickly killing the buffers
+created by python-dired-mode.  If the buffer was created by
+'python-dired-inspect-object', pressing "k" will kill the buffer, returning the
+user to the python-dired buffer.  If "k" is pressed while in the python-dired
+buffer, both the buffer and window will be deleted. 
